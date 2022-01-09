@@ -9,8 +9,8 @@ imagePath = "./pic.png"
 dataPath = '../pic.json' # 输出地址
 
 # 缩放后像素大小
-width = 48
-height = 48
+width = 191
+height = 59
 
 colors = {
     (0, 0, 0): 0,

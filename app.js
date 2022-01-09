@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const querystring = require('querystring');
 const process = require('process');
 
-const luoguPaintBoardUrl = 'https://www.luogu.com.cn/paintBoard';
+const hydroPaintBoardUrl = 'https://hydro.ac';
 
 let config;
 let pic = [];
@@ -67,8 +67,29 @@ function getPic() {
 async function getBoard() {
   lastGetBoardTime = Date.now();
   try {
-    let str = await fetch(luoguPaintBoardUrl + '/board');
-    board = (await str.text()).split('\n');
+    let str = await fetch(hydroPaintBoardUrl + '/api', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'referer': hydroPaintBoardUrl+'/paintboard',
+        'cookie': `sid=gvyNS20Fy4RMckpFOkxmxlq9M6IdtXgs; sid.sig=rHxOb9IUOHHXFgE8mFJRYIhyyMg;`
+      },
+      body: querystring.stringify({
+        query:"{paintboard{board}}"
+      })
+    });
+    board = []
+    let emptyArray = []
+    for(let i=0;i<=1000;i++){
+      emptyArray.push([]);
+    }
+    for(let i=0;i<=1000;i++){
+      board.push(emptyArray);
+    }
+    let res = JSON.parse(await str.text());
+    for(const o of res.data.paintboard.board){
+      board[o[0]][o[1]]=o[2];
+    }
     if (!board[board.length - 1]) {
       board.pop();
     }
@@ -86,9 +107,7 @@ function getReqPaintPos() {
       for (let pix of p.map) {
         if (parseInt(board[pix.x + p.x][pix.y + p.y], 36) != pix.color) {
           reqPaintPos.push({
-            x: pix.x + p.x,
-            y: pix.y + p.y,
-            color: pix.color
+            query:`{paintboard{paint(x:${pix.x + p.x},y:${pix.y + p.y},color:${pix.color})}}`
           });
         }
       }
@@ -101,20 +120,21 @@ function getReqPaintPos() {
 
 async function paintBoard(user, data) {
   try {
-    let res = await fetch(luoguPaintBoardUrl + '/paint', {
+    console.log(data);
+    let res = await fetch(hydroPaintBoardUrl + '/api', {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
-        'referer': luoguPaintBoardUrl,
-        'cookie': `_uid=${user.uid};__client_id=${user.client_id}`
+        'referer': hydroPaintBoardUrl+'/paintboard',
+        'cookie': `sid=${user.sid};sid.sig=${user.sid_sig}`
       },
       body: querystring.stringify(data)
     });
     res = JSON.parse(await res.text());
-    if (res.status == 200) {
+    if (res.data.paintboard.paint == null) {
       console.log(new Date().toLocaleString(), 'Paint PaintBoard Succeeded:', res.data);
     } else {
-      throw new Error(res.data);
+      throw new Error(JSON.stringify(res.data));
     }
   } catch (err) {
     console.warn(new Date().toLocaleString(), 'Paint PaintBoard Failed:', err);
