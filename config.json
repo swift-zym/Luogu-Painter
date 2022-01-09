@@ -1,0 +1,17 @@
+{
+  "picFile": [
+    {
+      "name": "pic.json",
+      "x": 100,
+      "y": 100
+    }
+  ],
+  "fetchTime": 10000,
+  "paintTime": 11000,
+  "users": [
+    {
+      "sid": "gvyNS20Fy4RMckpFOkxmxlq9M6IdtXgs",
+      "sid_sig": "rHxOb9IUOHHXFgE8mFJRYIhyyMg"
+    }
+  ]
+}
